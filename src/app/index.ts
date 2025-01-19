@@ -4,6 +4,8 @@ import bodyParser from "body-parser"
 import { ApolloServer } from "@apollo/server"
 import { expressMiddleware } from "@apollo/server/express4"
 import { User } from "./user"
+import JWTService from "../services/jwt"
+import { GraphQLContext } from "../interfaces"
 
 // Define schema
 const typeDefs = `#graphql
@@ -24,15 +26,36 @@ export async function initServer() {
     const app = express()
     app.use(bodyParser.json())
     app.use(cors())
-    
-    const graphqlServer = new ApolloServer({typeDefs, resolvers})
+
+    const graphqlServer = new ApolloServer<GraphQLContext>({typeDefs, resolvers})
 
     // Start Apollo Server
     await graphqlServer.start()
 
     // Use Apollo Server middleware with Express
-    app.use("/graphql", expressMiddleware(graphqlServer))
+    app.use("/graphql", expressMiddleware(graphqlServer, {
+        context: async ({req, res}) => {
+            return {
+                user: req.headers.authorization
+                ? JWTService.decodeToken(req.headers.authorization.split('Bearer ')[1]) 
+                : ""
+            }
+        }
+    }))
 
     return app
 
 }
+
+
+// , {
+//     context: async({req, res}) => {
+//         console.log("Context token: ", req.headers.authorization)
+        
+//         return {
+//             user: 
+//             req.headers.authorization ? 
+//             JWTService.decodeToken(req.headers.authorization.split("Bearer ")[1]) : 
+//             undefined
+//         }
+//     }}

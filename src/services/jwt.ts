@@ -1,19 +1,35 @@
 import { User } from "@prisma/client"
 import JWT from "jsonwebtoken"
+import { JWTUser } from "../interfaces"
 
-const JWT_SECRET = "T0pS3cR3T#"
+const JWT_SECRET = "$uper@1234."
+
 
 class JWTService {
-    public static async generateTokenForUser(user: User) {
+    // Generate token for user
+    public static generateTokenForUser(user: User): string {
+        const payload: JWTUser = {
+            id: user.id,
+            email: user.email,
+        };
 
-        const payload = {
-            id: user?.id,
-            email: user?.email
+        const token = JWT.sign(payload, JWT_SECRET);
+
+        return token;
+    }
+
+    // Decode the token and return user data or null if invalid
+    public static decodeToken(token: string) {
+        try {
+            const user = JWT.verify(token, JWT_SECRET)
+            return user as JWTUser;
+
+        } catch (error) {
+            // Log error and return null if token doesn't exist or if decoding fails
+            console.error("Token decoding failed:", error);
+            return null;
         }
-
-        const token = JWT.sign(payload, JWT_SECRET)
-        return token
     }
 }
 
-export default JWTService
+export default JWTService;
