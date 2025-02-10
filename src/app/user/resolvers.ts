@@ -2,6 +2,7 @@ import axios from 'axios'
 import { prismaClient } from '../../clients/db';
 import JWTService from '../../services/jwt';
 import { GraphQLContext } from '../../interfaces';
+import { User } from '@prisma/client';
 
 interface GoogleTokenResult {
     iss?: string;
@@ -87,4 +88,15 @@ const queries = {
     }
 }
 
-export const resolvers = { queries}
+const extraResolvers = {
+    User: {
+        // The resolver for the `tweets` field in the User type
+        tweets: (parent: User) => {
+            // Fetches tweets by the author's id using Prisma's relation filtering
+            // The nested author: { id: parent.id } suggests that author has a relation to another model
+            return prismaClient.tweet.findMany( {where: {author: {id: parent.id } } } )
+        }
+    }
+}
+
+export const resolvers = { queries, extraResolvers }

@@ -4,22 +4,36 @@ import bodyParser from "body-parser"
 import { ApolloServer } from "@apollo/server"
 import { expressMiddleware } from "@apollo/server/express4"
 import { User } from "./user"
+import { Tweet } from "./tweet"
 import JWTService from "../services/jwt"
 import { GraphQLContext } from "../interfaces"
 
 // Define schema
 const typeDefs = `#graphql
     ${User.types}
+    ${Tweet.types}
+
     type Query {
         ${User.queries}
+        ${Tweet.queries}
         }
+    
+    type Mutation {
+        ${Tweet.mutations}
+    }
 `;
 
 // Define resolvers
 const resolvers = {
     Query: {
-        ...User.resolvers.queries
+        ...User.resolvers.queries,
+        ...Tweet.resolvers.queries
     },
+    Mutation: {
+        ...Tweet.resolvers.mutations,
+    },
+    ...User.resolvers.extraResolvers,
+    ...Tweet.resolvers.extraResolvers
 };
 
 export async function initServer() {
