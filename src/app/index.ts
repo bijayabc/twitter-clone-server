@@ -60,16 +60,3 @@ export async function initServer() {
     return app
 
 }
-
-
-// , {
-//     context: async({req, res}) => {
-//         console.log("Context token: ", req.headers.authorization)
-        
-//         return {
-//             user: 
-//             req.headers.authorization ? 
-//             JWTService.decodeToken(req.headers.authorization.split("Bearer ")[1]) : 
-//             undefined
-//         }
-//     }}
