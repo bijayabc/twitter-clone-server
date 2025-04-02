@@ -1,4 +1,7 @@
+import * as dotenv from 'dotenv'
 import { initServer } from "./app";
+
+dotenv.config()
 const PORT = 8000
 
 async function init() {

@@ -20,6 +20,7 @@ const typeDefs = `#graphql
     
     type Mutation {
         ${Tweet.mutations}
+        ${User.mutations}
     }
 `;
 
@@ -31,6 +32,7 @@ const resolvers = {
     },
     Mutation: {
         ...Tweet.resolvers.mutations,
+        ...User.resolvers.mutations
     },
     ...User.resolvers.extraResolvers,
     ...Tweet.resolvers.extraResolvers
@@ -41,18 +43,22 @@ export async function initServer() {
     app.use(bodyParser.json())
     app.use(cors())
 
-    const graphqlServer = new ApolloServer<GraphQLContext>({typeDefs, resolvers})
+    app.get('/', (req, res) => {
+        res.status(200).json({"message": "Everything is working fine"})
+    })
+
+    const graphqlServer = new ApolloServer<GraphQLContext>({ typeDefs, resolvers })
 
     // Start Apollo Server
     await graphqlServer.start()
 
     // Use Apollo Server middleware with Express
     app.use("/graphql", expressMiddleware(graphqlServer, {
-        context: async ({req, res}) => {
+        context: async ({ req, res }) => {
             return {
                 user: req.headers.authorization
-                ? JWTService.decodeToken(req.headers.authorization.split('Bearer ')[1]) 
-                : ""
+                    ? JWTService.decodeToken(req.headers.authorization.split('Bearer ')[1])
+                    : ""
             }
         }
     }))
