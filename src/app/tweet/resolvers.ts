@@ -5,6 +5,7 @@ import { prismaClient } from "../../clients/db";
 import { GraphQLContext } from "../../interfaces";
 import UserService from "../../services/user";
 import TweetService, { createTweetPayload } from "../../services/tweet";
+import { redisClient } from "../../clients/redis";
 
 const s3Client = new S3Client({
     region: process.env.AWS_DEFAULT_REGION
@@ -42,6 +43,12 @@ const mutations = {
         const tweet = await TweetService.createTweet({...payload, userId: ctx.user.id})
 
         return tweet
+    },
+
+    deleteTweet: async (_parent: any, { tweetId }: { tweetId: string }, ctx: GraphQLContext) => {
+        if (!ctx.user) throw new Error("You are not logged in");
+      
+        return TweetService.deleteTweet(tweetId, ctx.user.id)
     }
 }
 
